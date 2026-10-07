@@ -1,0 +1,4 @@
+'use client';
+import Link from 'next/link';
+import {useEffect,useState} from 'react';
+export default function Header(){const [count,setCount]=useState(0);useEffect(()=>{const f=()=>{try{setCount(JSON.parse(localStorage.getItem('lt-cart')||'[]').reduce((a:any,x:any)=>a+x.quantity,0))}catch{}};f();addEventListener('storage',f);return()=>removeEventListener('storage',f)},[]);return <header className="header"><div className="container nav"><Link href="/" className="logo">LUXURY <span>TIFFINS</span></Link><nav><Link href="/">Home</Link><Link href="/menu">Menu</Link><Link href="/orders">Orders</Link><Link href="/admin">Admin</Link></nav><div className="navActions"><Link className="cartPill" href="/cart">🛒 Cart {count>0&&<b>{count}</b>}</Link><Link className="btn btn-yellow small" href="/login">Login</Link></div></div></header>}

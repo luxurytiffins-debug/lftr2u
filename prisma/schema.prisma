@@ -1,0 +1,22 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+
+enum Role { CUSTOMER ADMIN }
+enum OrderStatus { PLACED PAYMENT_CONFIRMED PREPARING PACKED OUT_FOR_DELIVERY DELIVERED CANCELLED }
+enum PaymentStatus { PENDING PAID FAILED REFUNDED }
+enum PaymentMethod { RAZORPAY COD }
+
+
+model User { id String @id @default(cuid()) name String email String @unique phone String passwordHash String role Role @default(CUSTOMER) active Boolean @default(true) createdAt DateTime @default(now()) updatedAt DateTime @updatedAt addresses Address[] orders Order[] }
+model Address { id String @id @default(cuid()) userId String user User @relation(fields:[userId], references:[id], onDelete:Cascade) name String phone String house String street String area String city String state String pincode String landmark String? instructions String? createdAt DateTime @default(now()) }
+model Category { id String @id @default(cuid()) name String @unique slug String @unique active Boolean @default(true) products Product[] }
+model Product { id String @id @default(cuid()) name String slug String @unique description String price Decimal @db.Decimal(10,2) imageUrl String? veg Boolean @default(true) active Boolean @default(true) featured Boolean @default(false) categoryId String category Category @relation(fields:[categoryId], references:[id]) availableFrom String? availableTo String? createdAt DateTime @default(now()) updatedAt DateTime @updatedAt orderItems OrderItem[] }
+model ServiceArea { id String @id @default(cuid()) pincode String @unique areaName String city String state String active Boolean @default(true) deliveryCharge Decimal @db.Decimal(10,2) estimatedDeliveryMinutes Int @default(45) codEnabled Boolean @default(true) onlinePaymentEnabled Boolean @default(true) createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
+model Order { id String @id @default(cuid()) orderNumber String @unique userId String user User @relation(fields:[userId], references:[id]) addressId String? addressSnapshot Json subtotal Decimal @db.Decimal(10,2) deliveryCharge Decimal @db.Decimal(10,2) discount Decimal @db.Decimal(10,2) total Decimal @db.Decimal(10,2) paymentMethod PaymentMethod paymentStatus PaymentStatus @default(PENDING) status OrderStatus @default(PLACED) razorpayOrderId String? razorpayPaymentId String? createdAt DateTime @default(now()) updatedAt DateTime @updatedAt items OrderItem[] statusHistory OrderStatusHistory[] payments Payment[] }
+model OrderItem { id String @id @default(cuid()) orderId String order Order @relation(fields:[orderId], references:[id], onDelete:Cascade) productId String product Product @relation(fields:[productId], references:[id]) nameSnapshot String priceSnapshot Decimal @db.Decimal(10,2) quantity Int }
+model Payment { id String @id @default(cuid()) orderId String order Order @relation(fields:[orderId], references:[id], onDelete:Cascade) provider String method PaymentMethod amount Decimal @db.Decimal(10,2) status PaymentStatus @default(PENDING) providerPaymentId String? createdAt DateTime @default(now()) }
+model Coupon { id String @id @default(cuid()) code String @unique type String value Decimal @db.Decimal(10,2) minOrder Decimal @db.Decimal(10,2) maxDiscount Decimal? @db.Decimal(10,2) expiresAt DateTime? usageLimit Int? usedCount Int @default(0) active Boolean @default(true) usages CouponUsage[] }
+model CouponUsage { id String @id @default(cuid()) couponId String coupon Coupon @relation(fields:[couponId], references:[id], onDelete:Cascade) userId String orderId String createdAt DateTime @default(now()) @@unique([couponId,userId]) }
+model Notification { id String @id @default(cuid()) userId String title String body String read Boolean @default(false) createdAt DateTime @default(now()) }
+model OrderStatusHistory { id String @id @default(cuid()) orderId String order Order @relation(fields:[orderId], references:[id], onDelete:Cascade) status OrderStatus createdAt DateTime @default(now()) }
+model Settings { id String @id @default(cuid()) businessName String @default("Luxury Tiffins") tagline String @default("Ghar Jaisa Khana, Budget Mein") freeDeliveryThreshold Decimal @default(109) deliveryChargeBelowThreshold Decimal @default(15) timezone String @default("Asia/Kolkata") }

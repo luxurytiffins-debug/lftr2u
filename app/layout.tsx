@@ -1,0 +1,3 @@
+import './globals.css';import Header from '@/components/Header';import {CartProvider} from '@/components/CartProvider';
+export const metadata={title:'Luxury Tiffins — Ghar Jaisa Khana, Budget Mein',description:'Affordable homemade-style food delivery in New Ashok Nagar, Delhi.'};
+export default function Layout({children}:{children:React.ReactNode}){return <html lang="en"><body><CartProvider><Header/>{children}<footer className="footer"><div className="container"><strong>LUXURY TIFFINS</strong><p className="muted">Ghar Jaisa Khana, Budget Mein • Currently delivering in New Ashok Nagar, PIN 110096.</p><p className="muted">© {new Date().getFullYear()} Luxury Tiffins</p></div></footer></CartProvider></body></html>}
